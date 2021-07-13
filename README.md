@@ -1,3 +1,3 @@
 rkt-tree-widget
 ===============
-README text here.
+Yet another tree widget for racket/gui.
