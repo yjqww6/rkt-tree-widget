@@ -68,8 +68,7 @@
                                    (+ vy (send ev get-y))
                                    #t))
          (when item
-           (expand-item item (not (node-cursor-expand? item)))
-           (refresh))]
+           (expand-item item (not (node-cursor-expand? item))))]
         [else (super on-event ev)]))
 
     (define/public (set-dir path)
