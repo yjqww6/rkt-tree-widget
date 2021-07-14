@@ -72,7 +72,7 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
                                                                                                 
  @defmethod[(locate-item [x exact-nonnegative-integer?] [y exact-nonnegative-integer?] [check-x? boolean? #f])
             (or/c #f node-cursor?)]{
-  Finds out the item at specific location (window coordinates).
+  Finds out the item at specific location (dc coordinates).
  }
 
  @defmethod[(make-indices-cursor [indices (non-empty-listof exact-nonnegative-integer?)])
