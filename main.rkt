@@ -27,6 +27,8 @@
   
   [tree-widget%
    (class/c
+    (init [wheel-step exact-positive-integer?])
+    
     [get-root (->m root-cursor?)]
 
     [append-item (->*m (generic-cursor? any/c) (boolean?) void?)]
