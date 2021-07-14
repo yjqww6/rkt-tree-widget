@@ -1,12 +1,13 @@
 #lang racket/base
-(require racket/class)
+(require "interfaces.rkt"
+         racket/class racket/gui/base)
 (provide auto-scroll-mixin)
 
-(define (auto-scroll-mixin %)
-  (class %
+(define auto-scroll-mixin
+  (mixin ((class->interface canvas%) scrollable<%> tree-view<%>) ()
     (inherit refresh
-             init-auto-scrollbars get-view-start get-client-size
-             get-dc scroll get-virtual-size
+             init-auto-scrollbars get-scrollable-pos get-client-size
+             get-dc scroll get-scrollable-size
              get-total-size)
     (init [(-ws wheel-step) 3]
           [[-style style] '()])
@@ -21,7 +22,7 @@
     (define/private (update-scrollbar)
       (define-values (cw ch) (get-client-size))
 
-      (define-values (x y) (get-view-start))
+      (define-values (x y) (get-scrollable-pos))
       (define-values (w h) (get-total-size cw ch))
 
       (define vw (max w (+ x cw)))
@@ -30,6 +31,10 @@
       (init-auto-scrollbars vw vh
                             (/ x (max 1 x (- vw cw)))
                             (/ y (max 1 y (- vh ch)))))
+    
+    (define/override (on-size cw ch)
+      (super on-size cw ch)
+      (update-scrollbar))
 
     (define/override (on-positions-changed)
       (update-scrollbar)
@@ -42,8 +47,8 @@
       (define (adjust dx dy)
         (define s (send event get-wheel-steps))
 
-        (define-values (vx vy) (get-view-start))
-        (define-values (vw vh) (get-virtual-size))
+        (define-values (vx vy) (get-scrollable-pos))
+        (define-values (vw vh) (get-scrollable-size))
         (define-values (cw ch) (get-client-size))
 
         (scroll (c dx s vx vw cw) (c dy s vy vh ch)))

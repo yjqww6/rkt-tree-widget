@@ -1,16 +1,9 @@
 #lang racket/base
-(require "tree-pos-cache.rkt" "auto-scroll.rkt"
+(require "tree-pos-cache.rkt" "interfaces.rkt"
+         "auto-scroll.rkt" "manual-scroll.rkt"
          racket/match racket/class racket/gui/base)
 
 (provide (all-defined-out))
-
-(define tree-view<%>
-  (interface ()
-    compute-item-size
-    get-total-size
-    locate-item
-    get-visible-items
-    on-positions-changed))
 
 (define tree-mixin
   (mixin () (tree-view<%>)
@@ -76,10 +69,26 @@
     
     (super-new)))
 
+(define scrollable-mixin
+  (mixin ((class->interface canvas%)) (scrollable<%>)
+    (inherit get-view-start get-virtual-size)
+    
+    (define/public (get-scrollable-size)
+      (get-virtual-size))
+    
+    (define/public (get-scrollable-pos)
+      (get-view-start))
+
+    (define/public (get-scrollable-canvas-start)
+      (values 0 0))
+
+    (super-new)))
+
 (define tree-canvas-mixin
-  (mixin ((class->interface canvas%) tree-view<%>) ()
+  (mixin ((class->interface canvas%) tree-view<%> scrollable<%>) ()
     (inherit refresh
-             get-view-start get-client-size
+             get-scrollable-pos get-client-size
+             get-scrollable-canvas-start
              get-visible-items)
 
     (define/override (on-positions-changed)
@@ -94,19 +103,25 @@
     (define/override (on-paint)
       (super on-paint)
       
-      (define-values (x y) (get-view-start))
+      (define-values (x y) (get-scrollable-pos))
       (define-values (cw ch) (get-client-size))
+      (define-values (cx cy) (get-scrollable-canvas-start))
 
       (define items (get-visible-items y (+ y ch)))
       (for ([item (in-list items)])
         (match item
           [(vector c y v)
-           (paint-item c v (cursor-indent c) y)])))
+           (paint-item c v (+ (cursor-indent c) cx) (+ y cy))])))
+
+    (define/override (locate-item x y [check-x? #f])
+      (define-values (cx cy) (get-scrollable-canvas-start))
+      (super locate-item (- x cx) (- y cy) check-x?))
     
     (super-new)))
 
 (define tree-widget%
-  (auto-scroll-mixin
+  (manual-scroll-mixin
    (tree-canvas-mixin
-    (tree-mixin
-     canvas%))))
+    (scrollable-mixin
+     (tree-mixin
+      canvas%)))))
