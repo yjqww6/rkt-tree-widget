@@ -72,28 +72,21 @@
         [else (super on-event ev)]))
 
     (define/public (set-dir path)
-      (dynamic-wind
-       (λ () (set! updating? #t))
-       (λ ()
-         (reset-items)
-         (let f ([path path] [l '()])
-           (for ([p (in-list (directory-list path))]
-                 [i (in-naturals)])
-             (define dir? (directory-exists? (build-path path p)))
-             (append-item (if (null? l)
-                              (get-root)
-                              (make-indices-cursor (reverse l)))
-                          (entry dir? (path->string p))
-                          #t)
-             (when dir?
-               (f (build-path path p) (cons i l))))))
-       (λ () (set! updating? #f)))
-      (on-positions-changed))
-
-    ;supress
-    (define/override (on-positions-changed)
-      (unless updating?
-        (super on-positions-changed)))
+      (define updater (new tree-updater% [tree this]))
+      (define empty (send updater empty-tree))
+      (define new-root
+        (let f ([path path] [cursor empty])
+          (for/fold ([cursor cursor])
+                    ([p (in-list (directory-list path))]
+                     [i (in-naturals)])
+            (define dir? (directory-exists? (build-path path p)))
+            (send updater append-item cursor
+                  (entry dir? (path->string p))
+                  #t
+                  (cond
+                    [dir? (f (build-path path p) empty)]
+                    [else empty])))))
+      (send updater set-tree new-root))
 
     (super-new)))
 

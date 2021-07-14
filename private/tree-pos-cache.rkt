@@ -94,14 +94,14 @@
 
 (define (cursor-children t)
   (define (f node root frames)
-     (let f ([t (T-children node)] [offset 0] [ls '()])
-       (match t
-         [#f ls]
-         [(T l r _ _ _ _ _ _ _ _ _)
-          (f l offset
-             (cons
-              (node-cursor root t (+ offset (tree-size l)) frames)
-              (f r (+ offset (tree-size l) 1) ls)))])))
+    (let f ([t (T-children node)] [offset 0] [ls '()])
+      (match t
+        [#f ls]
+        [(T l r _ _ _ _ _ _ _ _ _)
+         (f l offset
+            (cons
+             (node-cursor root t (+ offset (tree-size l)) frames)
+             (f r (+ offset (tree-size l) 1) ls)))])))
   (match t
     [(tree-pos-cache #f) '()]
     [(tree-pos-cache root) (f root root #f)]
@@ -122,9 +122,9 @@
     [(node-cursor root node pos frames)
      (node-cursor root (get-node (T-children node) i) i (frame node pos frames))]))
 
-(define ((make-node-field-generator v e? ind)) 
-  (define-values (value width height) (v))
-  (values value width height #f e? ind))
+(define ((make-node-field-generator v e? c)) 
+  (define-values (value width height ind) (v))
+  (values value width height c e? ind))
 
 (define (update-node-children t u)
   (define (f node indices)
@@ -152,16 +152,16 @@
      (tree-pos-cache
       (f root indices))]))
 
-(define (tree-pos-cache-append t v e? ind)
-  (define (u t) (append-item t (make-node-field-generator v e? ind)))
+(define (tree-pos-cache-append t v e? c)
+  (define (u t) (append-item t (make-node-field-generator v e? c)))
   (update-node-children t u))
 
-(define (tree-pos-cache-prepend t v e? ind)
-  (define (u t) (prepend-item t (make-node-field-generator v e? ind)))
+(define (tree-pos-cache-prepend t v e? c)
+  (define (u t) (prepend-item t (make-node-field-generator v e? c)))
   (update-node-children t u))
 
-(define (tree-pos-cache-insert t i v e? ind)
-  (define (u t) (insert-item t i (make-node-field-generator v e? ind)))
+(define (tree-pos-cache-insert t i v e? c)
+  (define (u t) (insert-item t i (make-node-field-generator v e? c)))
   (update-node-children t u))
 
 (define (tree-pos-cache-delete t i)
@@ -170,8 +170,8 @@
 
 (define (tree-pos-cache-update t i v)
   (define (updater t)
-    (define-values (value width height) (v))
-    (values value width height (T-children t) (T-expand? t) (T-indent t)))
+    (define-values (value width height ind) (v))
+    (values value width height (T-children t) (T-expand? t) ind))
   (define (u t) (update-item t i updater))
   (update-node-children t u))
 
@@ -183,12 +183,21 @@
   (match t
     [(tree-pos-cache root) t]
     [(or (node-cursor _ _ pos _) (indices-cursor _ (cons pos _)))
-     (define c
-       (match (cursor-up t)
-         [(and (tree-pos-cache root) t) t]
-         [c c]))
+     (define c (cursor-up t))
      (define (u t) (update-item t pos updater))
      (update-node-children c u)]))
+
+(define (tree-pos-cache-update-children t u)
+  (define (updater t)
+    (match t
+      [(T _ _ _ v w h c b ind _ _)
+       (values v w h (tree-pos-cache-root (u (tree-pos-cache c))) b ind)]))
+  (match t
+    [(tree-pos-cache root) (u t)]
+    [(node-cursor _ _ pos _)
+     (define c (cursor-up t))
+     (define (f t) (update-item t pos updater))
+     (update-node-children c f)]))
 
 (define (tree-pos-cache-total-size t)
   (match t
@@ -270,6 +279,11 @@
     [((tree-pos-cache a) (node-cursor b _ _ _)) (eq? a b)]
     [((tree-pos-cache a) (indices-cursor b _)) (eq? a b)]
     [(_ _) #f]))
+
+(define (cursor-node t)
+  (match t
+    [(tree-pos-cache root) root]
+    [(node-cursor _ node _ _) node]))
 
 (define (node-cursor-value t)
   (T-value (node-cursor-node t)))

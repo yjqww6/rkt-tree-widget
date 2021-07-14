@@ -50,12 +50,14 @@
   (define f (new frame% [label "test"] [width 640] [height 240]))
   
   (define t (new (paint-mixin tree-widget%) [parent f] [style '(vscroll)]))
-  
-  (for ([i (in-range 10)])
-    (send t append-item (send t get-root) i #t)
-    (for ([j (in-range 3)])
-      (send t append-item (cursor-get-child (send t get-root) i) j #t)
-      (for ([k (in-range 2)])
-        (send t append-item (send t make-indices-cursor (list i j)) k #t))))
+
+  (collect-garbage)
+  (time
+   (for ([i (in-range 10)])
+     (send t append-item (send t get-root) i #t)
+     (for ([j (in-range 3)])
+       (send t append-item (cursor-get-child (send t get-root) i) j #t)
+       (for ([k (in-range 2)])
+         (send t append-item (send t make-indices-cursor (list i j)) k #t)))))
   
   (send f show #t))

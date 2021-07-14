@@ -5,6 +5,8 @@
 
 (provide (all-defined-out))
 
+(define-local-member-name set-root)
+
 (define tree-mixin
   (mixin () (tree-view<%>)
     (define cache empty-tree-pos-cache)
@@ -27,6 +29,10 @@
     (define/public (get-root)
       cache)
 
+    (define/public (set-root t)
+      (set! cache t)
+      (on-positions-changed))
+
     (define/private (validate-cursor who t)
       (unless (cursor-valid? cache t)
         (error who "invalid cursor")))
@@ -38,14 +44,20 @@
       (define/public (name t a ... v [expand? #f])
         (validate-cursor 'name t)
         (define-values (w h ind) (compute-item-size v))
-        (set! cache (op t a ... (λ () (values v w h)) expand? ind))
+        (set! cache (op t a ... (λ () (values v w h ind)) expand? #f))
         (on-positions-changed)
         (void)))
 
     (define-op (append-item t v) tree-pos-cache-append)
     (define-op (prepend-item t v) tree-pos-cache-prepend)
     (define-op (insert-item t i v) tree-pos-cache-insert)
-    (define-op (update-item t i v) tree-pos-cache-update)
+
+    (define/public (update-item t i v)
+      (validate-cursor 'update-item t)
+      (define-values (w h ind) (compute-item-size v))
+      (set! cache (tree-pos-cache-update t i (λ () (values v w h ind))))
+      (on-positions-changed)
+      (void))
 
     (define/public (delete-item t i)
       (validate-cursor 'delete-item t)
@@ -68,6 +80,39 @@
       (tree-pos-cache-make-indices-cursor cache indices))
     
     (super-new)))
+
+(define tree-updater%
+  (class object%
+    (init-field tree)
+    (super-new)
+
+    (define-syntax-rule (define-op (name t a ... v) op)
+      (define/public (name t a ... v [expand? #f] [children #f])
+        (define-values (w h ind) (send tree compute-item-size v))
+        (op t a ... (λ () (values v w h ind)) expand? (and children (cursor-node children)))))
+
+    (define-op (append-item t v) tree-pos-cache-append)
+    (define-op (prepend-item t v) tree-pos-cache-prepend)
+    (define-op (insert-item t i v) tree-pos-cache-insert)
+
+    (define/public (update-item t i v)
+      (define-values (w h ind) (send tree compute-item-size v))
+      (tree-pos-cache-update t i (λ () (values v w h ind))))
+
+    (define/public (delete-item t i)
+      (tree-pos-cache-delete t i))
+
+    (define/public (expand-item t b?)
+      (tree-pos-cache-expand t b?))
+
+    (define/public (update-children t u)
+      (tree-pos-cache-update-children t u))
+
+    (define/public (set-tree t)
+      (send tree set-root t))
+
+    (define/public (empty-tree)
+      empty-tree-pos-cache)))
 
 (define scrollable-mixin
   (mixin ((class->interface canvas%)) (scrollable<%>)

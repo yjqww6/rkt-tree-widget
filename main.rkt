@@ -34,7 +34,7 @@
     [append-item (->*m (generic-cursor? any/c) (boolean?) void?)]
     [prepend-item (->*m (generic-cursor? any/c) (boolean?) void?)]
     [insert-item (->*m (generic-cursor? exact-nonnegative-integer? any/c) (boolean?) void?)]
-    [update-item (->*m (generic-cursor? exact-nonnegative-integer? any/c) (boolean?) void?)]
+    [update-item (->m generic-cursor? exact-nonnegative-integer? any/c void?)]
     [delete-item (->m generic-cursor? exact-nonnegative-integer? void?)]
     [expand-item (->m generic-cursor? boolean? void?)]
     [reset-items (->m void?)]
@@ -44,4 +44,19 @@
     [compute-item-size (->m any/c (values exact-positive-integer? exact-positive-integer? exact-nonnegative-integer?))]
     [locate-item (->*m (exact-nonnegative-integer? exact-nonnegative-integer?) (boolean?) (or/c #f node-cursor?))]
 
-    [make-indices-cursor (->m (non-empty-listof exact-nonnegative-integer?) indices-cursor?)])]))
+    [make-indices-cursor (->m (non-empty-listof exact-nonnegative-integer?) indices-cursor?)])]
+
+  [tree-updater%
+   (class/c
+    (init [tree (is-a?/c tree-widget%)])
+
+    [append-item (->*m (generic-cursor? any/c) (boolean? (or/c #f cursor?)) root-cursor?)]
+    [prepend-item (->*m (generic-cursor? any/c) (boolean? (or/c #f cursor?)) root-cursor?)]
+    [insert-item (->*m (generic-cursor? exact-nonnegative-integer? any/c) (boolean? (or/c #f cursor?)) root-cursor?)]
+    [update-item (->m generic-cursor? exact-nonnegative-integer? any/c root-cursor?)]
+    [delete-item (->m generic-cursor? exact-nonnegative-integer? root-cursor?)]
+    [expand-item (->m generic-cursor? boolean? root-cursor?)]
+    [update-children (->m generic-cursor? (-> root-cursor? root-cursor?) root-cursor?)]
+
+    [set-tree (->m root-cursor? void?)]
+    [empty-tree (->m root-cursor?)])]))

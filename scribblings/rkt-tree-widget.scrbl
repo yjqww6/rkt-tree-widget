@@ -33,7 +33,7 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
   Inserts an item @racket[v] as the @racket[i]th child of @racket[c]. All the cursors acquired previously will be invalidated.
  }
 
- @defmethod[(update-item [c generic-cursor?] [i exact-nonnegative-integer?] [v any/c] [expand? boolean? #f]) void?]{
+ @defmethod[(update-item [c generic-cursor?] [i exact-nonnegative-integer?] [v any/c]) void?]{
   Updates the @racket[i]th child of @racket[c] to @racket[v]. All the cursors acquired previously will be invalidated.
  }
 
@@ -87,46 +87,83 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
  
 }
 
+@section{Functional Updating}
+@defclass[tree-updater% object% ()]{
+ @racket[tree-updater%] is used to building and updating @racket[tree-widget%] functionally.
+ @defconstructor[([tree (is-a?/c tree-widget%)])]{
+ Constructs a @racket[tree-updater%] associated with @racket[tree].
+ }
+
+ @defmethod[(append-item [t generic-cursor?] [v any/c]
+                         [expand? boolean? #f] [children (or/c #f cursor?) #f])
+            root-cursor?]{
+ }
+ @defmethod[(prepend-item [t generic-cursor?] [v any/c]
+                          [expand? boolean? #f] [children (or/c #f cursor?) #f])
+            root-cursor?]{
+ }
+ @defmethod[(insert-item [t generic-cursor?] [i exact-nonnegative-integer?] [v any/c]
+                         [expand? boolean? #f] [children (or/c #f cursor?) #f])
+            root-cursor?]{
+ }
+ @defmethod[(update-item [t generic-cursor?] [i exact-nonnegative-integer?] [v any/c])
+            root-cursor?]{
+ }
+ @defmethod[(delete-item [t generic-cursor?] [i exact-nonnegative-integer?])
+            root-cursor?]{
+ }
+ @defmethod[(expand-item [t generic-cursor?] [expand? boolean?]) root-cursor?]{
+ }
+ @defmethod[(update-children [t generic-cursor?] [f (-> root-cursor? root-cursor?)])
+             root-cursor?]{
+ }
+ @defmethod[(set-tree [tree root-cursor?]) void?]{
+ Set the tree of associated @racket[tree-widget%] to @racket[tree].
+ }
+ @defmethod[(empty-tree) root-cursor?]{
+ }
+}
+
 @section{Cursor Operations}
 @defproc[(root-cursor? [v any/c]) boolean?]{
-Returns @racket[#t] if @racket[v] is a root cursor, otherwise @racket[#f]. A root cursor represents the root of a tree.
+ Returns @racket[#t] if @racket[v] is a root cursor, otherwise @racket[#f]. A root cursor represents the root of a tree.
 }
 @defproc[(node-cursor? [v any/c]) boolean?]{
-Returns @racket[#t] if @racket[v] is a node cursor, otherwise @racket[#f]. A node cursor represents an internal node of a tree.
+ Returns @racket[#t] if @racket[v] is a node cursor, otherwise @racket[#f]. A node cursor represents an internal node of a tree.
 }
 @defproc[(cursor? [v any/c]) boolean?]{
-Returns @racket[#t] if either @racket[(root-cursor? v)] or @racket[(node-cursor? v)] return @racket[t], otherwise @racket[#f].
+ Returns @racket[#t] if either @racket[(root-cursor? v)] or @racket[(node-cursor? v)] return @racket[#t], otherwise @racket[#f].
 }
 @defproc[(indices-cursor? [v any/c]) boolean?]{
-Returns @racket[#t] if @racket[v] is a indices cursor, otherwise @racket[#f]. See also @method[tree-widget% make-indices-cursor].
+ Returns @racket[#t] if @racket[v] is a indices cursor, otherwise @racket[#f]. See also @method[tree-widget% make-indices-cursor].
 }
 @defproc[(generic-cursor? [v any/c]) boolean?]{
-Returns @racket[#t] if either @racket[(cursor? v)] or @racket[(indices-cursor? v)] return @racket[t], otherwise @racket[#f].
+ Returns @racket[#t] if either @racket[(cursor? v)] or @racket[(indices-cursor? v)] return @racket[#t], otherwise @racket[#f].
 }
 
 @defproc[(cursor-up [c cursor?]) cursor?]{
-Returns a cursor representing the parent node of @racket[c]. If @racket[c] is a root cursor, returns itself.
+ Returns a cursor representing the parent node of @racket[c]. If @racket[c] is a root cursor, returns itself.
 }
 @defproc[(cursor-equal? [a cursor?] [b cursor?]) boolean?]{
-Returns @racket[#t] if @racket[a] and @racket[b] represent same node (or same root), otherwise @racket[#f].
+ Returns @racket[#t] if @racket[a] and @racket[b] represent same node (or same root), otherwise @racket[#f].
 }
 @defproc[(cursor-valid? [t root-cursor?] [c cursor?]) boolean?]{
-Returns @racket[#t] if @racket[t] is the root of @racket[c], otherwise @racket[#f].
+ Returns @racket[#t] if @racket[t] is the root of @racket[c], otherwise @racket[#f].
 }
 @defproc[(cursor-children [c cursor?]) (listof node-cursor?)]{
-Returns the children of @racket[c].
+ Returns the children of @racket[c].
 }
 @defproc[(cursor-get-child [c cursor?] [i exact-nonnegative-integer?]) node-cursor?]{
-Returns the @racket[i]th child of @racket[c].
+ Returns the @racket[i]th child of @racket[c].
 }
 @defproc[(node-cursor-item-size [c node-cursor?]) (values exact-positive-integer? exact-positive-integer?)]{
-Returns the width and height of the item of @racket[c].
+ Returns the width and height of the item of @racket[c].
 }
 @defproc[(node-cursor-value [c node-cursor?]) any/c]{
-Returns the item value of @racket[c].
+ Returns the item value of @racket[c].
 }
 @defproc[(node-cursor-expand? [c node-cursor?]) boolean?]{
-Returns @racket[#t] if @racket[c] is expanded, otherwise @racket[#f].
+ Returns @racket[#t] if @racket[c] is expanded, otherwise @racket[#f].
 }
 
 
