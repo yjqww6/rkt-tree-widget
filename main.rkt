@@ -21,7 +21,7 @@
   [cursor-valid? (-> root-cursor? cursor? boolean?)]
   [cursor-children (-> cursor? (listof node-cursor?))]
   [cursor-get-child (-> cursor? exact-nonnegative-integer? node-cursor?)]
-  [node-cursor-item-size (-> node-cursor? (values exact-nonnegative-integer? exact-nonnegative-integer?))]
+  [node-cursor-item-size (-> node-cursor? (values exact-positive-integer? exact-positive-integer?))]
   [node-cursor-value (-> node-cursor? any/c)]
   [node-cursor-expand? (-> node-cursor? boolean?)]
   

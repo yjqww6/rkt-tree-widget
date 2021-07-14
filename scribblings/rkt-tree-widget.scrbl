@@ -1,10 +1,134 @@
 #lang scribble/manual
 @require[@for-label[rkt-tree-widget
-                    racket/base]]
+                    racket/base racket/class racket/gui/base racket/contract/base]]
 
 @title{rkt-tree-widget}
 @author{yjqww6}
 
 @defmodule[rkt-tree-widget]
 
-Package Description Here
+Yet another tree widget for Racket. It uses functional cursors to represent the nodes of the tree.
+
+@section{Tree Widget}
+@defclass[tree-widget% canvas% ()]{
+ A @racket[canvas%]-based tree widget.
+   
+ @defconstructor/auto-super[([wheel-step exact-positive-integer? 3])]{
+  The @racket[wheel-step] argument controls the speed of scrolling.
+ }
+
+ @defmethod[(get-root) root-cursor?]{
+  Returns a cursor representing the root of the tree.
+ }
+
+ @defmethod[(append-item [c generic-cursor?] [v any/c] [expand? boolean? #f]) void?]{
+  Appends an item @racket[v] to the children of @racket[c]. All the cursors acquired previously will be invalidated.
+ }
+
+ @defmethod[(prepend-item [c generic-cursor?] [v any/c] [expand? boolean? #f]) void?]{
+  Prepends an item @racket[v] to the children of @racket[c]. All the cursors acquired previously will be invalidated.
+ }
+
+ @defmethod[(insert-item [c generic-cursor?] [i exact-nonnegative-integer?] [v any/c] [expand? boolean? #f]) void?]{
+  Inserts an item @racket[v] as the @racket[i]th child of @racket[c]. All the cursors acquired previously will be invalidated.
+ }
+
+ @defmethod[(update-item [c generic-cursor?] [i exact-nonnegative-integer?] [v any/c] [expand? boolean? #f]) void?]{
+  Updates the @racket[i]th child of @racket[c] to @racket[v]. All the cursors acquired previously will be invalidated.
+ }
+
+ @defmethod[(delete-item [c generic-cursor?] [i exact-nonnegative-integer?]) void?]{
+  Deletes the @racket[i]th child of @racket[c]. All the cursors acquired previously will be invalidated.
+ }
+
+ @defmethod[(expand-item [c generic-cursor?] [expand? boolean?]) void?]{
+  Changes the expanding status of @racket[c] to @racket[expand?]. All the cursors acquired previously will be invalidated.
+ }
+
+ @defmethod[(reset-items) void]{
+  Resets the tree to empty. All the cursors acquired previously will be invalidated.
+ }
+
+ @defmethod[(on-positions-changed) void?]{
+  Called after the tree is modified.
+
+  
+  @italic{Default Implementation:} Calls @method[window<%> refresh].
+ }
+
+ @defmethod[(paint-item [c node-cursor?] [v any/c]
+                        [x exact-nonnegative-integer?] [y exact-nonnegative-integer?])
+            void?]{
+  Paints the item @racket[v] represented by cursor @racket[c] at specific dc location.
+ }
+
+ @defmethod[(compute-item-size [v any/c])
+            (values exact-positive-integer? exact-positive-integer? exact-nonnegative-integer?)]{
+  Computes the width, height and children indentation of item @racket[v].
+
+                                                              
+  @italic{Default Implementation:} Returns @racket[(values 1 1 0)].                                                       
+ }
+                                                                                                
+ @defmethod[(locate-item [x exact-nonnegative-integer?] [y exact-nonnegative-integer?] [check-x? boolean? #f])
+            (or/c #f node-cursor?)]{
+  Finds out the item at specific location (window coordinates).
+ }
+
+ @defmethod[(make-indices-cursor [indices (non-empty-listof exact-nonnegative-integer?)])
+            indices-cursor?]{
+  Constructs an cursor from @racket[indices], which should be only used to modify the tree immediately.
+  Equivalent to
+  @racketblock[(for/fold ([t (send this get-root)])
+                         ([i (in-list indices)])
+                 (cursor-get-child t i))]
+  when used to modify the tree.
+ }
+ 
+}
+
+@section{Cursor Operations}
+@defproc[(root-cursor? [v any/c]) boolean?]{
+Returns @racket[#t] if @racket[v] is a root cursor, otherwise @racket[#f]. A root cursor represents the root of a tree.
+}
+@defproc[(node-cursor? [v any/c]) boolean?]{
+Returns @racket[#t] if @racket[v] is a node cursor, otherwise @racket[#f]. A node cursor represents an internal node of a tree.
+}
+@defproc[(cursor? [v any/c]) boolean?]{
+Returns @racket[#t] if either @racket[(root-cursor? v)] or @racket[(node-cursor? v)] return @racket[t], otherwise @racket[#f].
+}
+@defproc[(indices-cursor? [v any/c]) boolean?]{
+Returns @racket[#t] if @racket[v] is a indices cursor, otherwise @racket[#f]. See also @method[tree-widget% make-indices-cursor].
+}
+@defproc[(generic-cursor? [v any/c]) boolean?]{
+Returns @racket[#t] if either @racket[(cursor? v)] or @racket[(indices-cursor? v)] return @racket[t], otherwise @racket[#f].
+}
+
+@defproc[(cursor-up [c cursor?]) cursor?]{
+Returns a cursor representing the parent node of @racket[c]. If @racket[c] is a root cursor, returns itself.
+}
+@defproc[(cursor-equal? [a cursor?] [b cursor?]) boolean?]{
+Returns @racket[#t] if @racket[a] and @racket[b] represent same node (or same root), otherwise @racket[#f].
+}
+@defproc[(cursor-valid? [t root-cursor?] [c cursor?]) boolean?]{
+Returns @racket[#t] if @racket[t] is the root of @racket[c], otherwise @racket[#f].
+}
+@defproc[(cursor-children [c cursor?]) (listof node-cursor?)]{
+Returns the children of @racket[c].
+}
+@defproc[(cursor-get-child [c cursor?] [i exact-nonnegative-integer?]) node-cursor?]{
+Returns the @racket[i]th child of @racket[c].
+}
+@defproc[(node-cursor-item-size [c node-cursor?]) (values exact-positive-integer? exact-positive-integer?)]{
+Returns the width and height of the item of @racket[c].
+}
+@defproc[(node-cursor-value [c node-cursor?]) any/c]{
+Returns the item value of @racket[c].
+}
+@defproc[(node-cursor-expand? [c node-cursor?]) boolean?]{
+Returns @racket[#t] if @racket[c] is expanded, otherwise @racket[#f].
+}
+
+
+
+
