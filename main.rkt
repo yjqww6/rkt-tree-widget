@@ -36,6 +36,7 @@
     [delete-item (->m generic-cursor? exact-nonnegative-integer? void?)]
     [expand-item (->m generic-cursor? boolean? void?)]
     [reset-items (->m void?)]
+    [on-positions-changed (->m void?)]
 
     [paint-item (->m node-cursor? any/c exact-nonnegative-integer? exact-nonnegative-integer? void?)]
     [compute-item-size (->m any/c (values exact-positive-integer? exact-positive-integer? exact-nonnegative-integer?))]
