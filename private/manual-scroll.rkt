@@ -4,7 +4,7 @@
 (provide manual-scroll-mixin)
 
 (define manual-scroll-mixin
-  (mixin ((class->interface canvas%) scrollable<%> tree-view<%>) ()
+  (mixin ((class->interface canvas%) scrollable<%> tree<%>) ()
     (inherit refresh get-dc
              init-manual-scrollbars get-client-size
              get-scroll-range get-scroll-pos set-scroll-pos

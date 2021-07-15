@@ -1,17 +1,15 @@
 #lang racket/base
 (require "tree-pos-cache.rkt" "interfaces.rkt"
-         "auto-scroll.rkt" "manual-scroll.rkt"
+         "manual-scroll.rkt"
          racket/match racket/class racket/gui/base)
 
 (provide (all-defined-out))
 
-(define-local-member-name set-root)
-
 (define tree-mixin
-  (mixin () (tree-view<%>)
+  (mixin () (tree<%>)
     (define cache empty-tree-pos-cache)
 
-    (define/public (compute-item-size)
+    (define/public (compute-item-size v)
       (values 1 1 0))
 
     (define/public (compute-indent v w h)
@@ -33,20 +31,25 @@
       (set! cache t)
       (on-positions-changed))
 
-    (define/private (validate-cursor who t)
-      (unless (cursor-valid? cache t)
-        (error who "invalid cursor")))
-
     (define/public (on-positions-changed)
       (void))
+    
+    (super-new)))
+
+(define tree-op-mixin
+  (mixin (tree<%>) ()
+    (inherit set-root get-root compute-item-size)
+
+    (define/private (validate-cursor who t)
+      (unless (cursor-valid? (get-root) t)
+        (error who "invalid cursor")))
+    
 
     (define-syntax-rule (define-op (name t a ... v) op)
       (define/public (name t a ... v [expand? #f])
         (validate-cursor 'name t)
         (define-values (w h ind) (compute-item-size v))
-        (set! cache (op t a ... (λ () (values v w h ind)) expand? #f))
-        (on-positions-changed)
-        (void)))
+        (set-root (op t a ... (λ () (values v w h ind)) expand? #f))))
 
     (define-op (append-item t v) tree-pos-cache-append)
     (define-op (prepend-item t v) tree-pos-cache-prepend)
@@ -55,30 +58,22 @@
     (define/public (update-item t i v)
       (validate-cursor 'update-item t)
       (define-values (w h ind) (compute-item-size v))
-      (set! cache (tree-pos-cache-update t i (λ () (values v w h ind))))
-      (on-positions-changed)
-      (void))
+      (set-root (tree-pos-cache-update t i (λ () (values v w h ind)))))
 
     (define/public (delete-item t i)
       (validate-cursor 'delete-item t)
-      (set! cache (tree-pos-cache-delete t i))
-      (on-positions-changed)
-      (void))
+      (set-root (tree-pos-cache-delete t i)))
 
     (define/public (expand-item t b?)
       (validate-cursor 'expand-item t)
-      (set! cache (tree-pos-cache-expand t b?))
-      (on-positions-changed)
-      (void))
+      (set-root (tree-pos-cache-expand t b?)))
 
     (define/public (reset-items)
-      (set! cache empty-tree-pos-cache)
-      (on-positions-changed)
-      (void))
+      (set-root empty-tree-pos-cache))
 
     (define/public (make-indices-cursor indices)
-      (tree-pos-cache-make-indices-cursor cache indices))
-    
+      (tree-pos-cache-make-indices-cursor (get-root) indices))
+
     (super-new)))
 
 (define tree-updater%
@@ -130,7 +125,7 @@
     (super-new)))
 
 (define tree-canvas-mixin
-  (mixin ((class->interface canvas%) tree-view<%> scrollable<%>) ()
+  (mixin ((class->interface canvas%) tree<%> scrollable<%>) ()
     (inherit refresh
              get-scrollable-pos get-client-size
              get-scrollable-canvas-start
@@ -141,9 +136,6 @@
 
     (define/public (paint-item i v x y)
       (void))
-
-    (define/override (compute-item-size v)
-      (values 1 1 0))
 
     (define/override (on-paint)
       (super on-paint)
@@ -168,5 +160,20 @@
   (manual-scroll-mixin
    (tree-canvas-mixin
     (scrollable-mixin
-     (tree-mixin
-      canvas%)))))
+     (tree-op-mixin
+      (tree-mixin
+       canvas%))))))
+
+(module+ main
+  (define tree (new (tree-mixin object%)))
+  (define u (new tree-updater% [tree tree]))
+  
+  (time
+   (send u set-tree
+         (let f ([i 4])
+           (cond
+             [(= i 0) (send u empty-tree)]
+             [else
+              (for/fold ([t (send u empty-tree)])
+                        ([x (in-range 10)])
+                (send u append-item t x #t (f (sub1 i))))])))))

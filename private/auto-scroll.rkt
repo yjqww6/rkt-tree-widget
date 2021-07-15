@@ -4,7 +4,7 @@
 (provide auto-scroll-mixin)
 
 (define auto-scroll-mixin
-  (mixin ((class->interface canvas%) scrollable<%> tree-view<%>) ()
+  (mixin ((class->interface canvas%) scrollable<%> tree<%>) ()
     (inherit refresh
              init-auto-scrollbars get-scrollable-pos get-client-size
              get-dc scroll get-scrollable-size
