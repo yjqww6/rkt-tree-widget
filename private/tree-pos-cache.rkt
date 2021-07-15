@@ -108,6 +108,16 @@
     [(node-cursor root node pos frames)
      (f node root (frame node pos frames))]))
 
+(define (cursor-children-cursor t)
+  (match t
+    [(tree-pos-cache _) t]
+    [(node-cursor _ node _ _) (tree-pos-cache (T-children node))]))
+
+(define (cursor-children-count t)
+  (match t
+    [(tree-pos-cache root) (tree-size root)]
+    [(node-cursor _ node _ _) (tree-size (T-children node))]))
+
 (define (frames->indices f pos)
   (let loop ([f f] [l (list pos)])
     (match f

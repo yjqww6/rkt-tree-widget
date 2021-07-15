@@ -154,6 +154,12 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
 @defproc[(cursor-children [c cursor?]) (listof node-cursor?)]{
  Returns the children of @racket[c].
 }
+@defproc[(cursor-children-cursor [c cursor?]) root-cursor?]{
+ Similar to @racket[cursor-children], but returns a root cursor instead.
+}
+@defproc[(cursor-children-count [c cursor?]) exact-nonnegative-integer?]{
+ Returns the the number of children of @racket[c].
+}
 @defproc[(cursor-get-child [c cursor?] [i exact-nonnegative-integer?]) node-cursor?]{
  Returns the @racket[i]th child of @racket[c].
 }
@@ -166,7 +172,9 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
 @defproc[(node-cursor-expand? [c node-cursor?]) boolean?]{
  Returns @racket[#t] if @racket[c] is expanded, otherwise @racket[#f].
 }
-
+@defproc[(node-cursor-pos [c cursor?]) exact-nonnegative-integer?]{
+ Returns the the position of @racket[c] in its parent.
+}
 
 
 

@@ -66,4 +66,11 @@
              (tree-pos-cache-append t (λ () (values i 1 1 0)) #t #f))))))
     (check-equal?
      (unwrap-tree-pos-cache t)
-     '((0 : 0 1 2 3 4 5 6 7 8 9) (1 : 0 1 2 3 4 5 6 7 8 9) (2 : 0 1 2 3 4 5 6 7 8 9)))))
+     '((0 : 0 1 2 3 4 5 6 7 8 9) (1 : 0 1 2 3 4 5 6 7 8 9) (2 : 0 1 2 3 4 5 6 7 8 9))))
+
+  (check-equal? (cursor-children-count t3) 10)
+  (check-equal? (unwrap-tree-pos-cache
+                 (cursor-children-cursor (cursor-get-child t3 4)))
+                (cons '(0 : 100) (range 1 10)))
+  (check-equal? (node-cursor-pos (cursor-get-child t3 8))
+                8))

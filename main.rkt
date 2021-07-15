@@ -20,10 +20,13 @@
   [cursor-equal? (-> cursor? cursor? boolean?)]
   [cursor-valid? (-> root-cursor? cursor? boolean?)]
   [cursor-children (-> cursor? (listof node-cursor?))]
+  [cursor-children-cursor (-> cursor? root-cursor?)]
+  [cursor-children-count (-> cursor? exact-nonnegative-integer?)]
   [cursor-get-child (-> cursor? exact-nonnegative-integer? node-cursor?)]
   [node-cursor-item-size (-> node-cursor? (values exact-positive-integer? exact-positive-integer?))]
   [node-cursor-value (-> node-cursor? any/c)]
   [node-cursor-expand? (-> node-cursor? boolean?)]
+  [node-cursor-pos (-> node-cursor? exact-nonnegative-integer?)]
   
   [tree-widget%
    (class/c
