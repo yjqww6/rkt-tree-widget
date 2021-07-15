@@ -70,9 +70,10 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
   @italic{Default Implementation:} Returns @racket[(values 1 1 0)].                                                       
  }
                                                                                                 
- @defmethod[(locate-item [x exact-nonnegative-integer?] [y exact-nonnegative-integer?] [check-x? boolean? #f])
+ @defmethod[(locate-item [x (or/c #f exact-nonnegative-integer?)] [y exact-nonnegative-integer?])
             (or/c #f node-cursor?)]{
   Finds out the item at specific location (dc coordinates).
+  If @racket[x] is @racket[#f], only @racket[y] is considered.
  }
 
  @defmethod[(make-indices-cursor [indices (non-empty-listof exact-nonnegative-integer?)])

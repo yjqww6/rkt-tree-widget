@@ -37,8 +37,7 @@
         [(eq? (send ev get-event-type) 'left-down)
          (define-values (vx vy) (get-view-start))
          (define item (locate-item (+ vx (send ev get-x))
-                                   (+ vy (send ev get-y))
-                                   #t))
+                                   (+ vy (send ev get-y))))
          (when item
            (set! selected (make-weak-box item)))
          (refresh)]

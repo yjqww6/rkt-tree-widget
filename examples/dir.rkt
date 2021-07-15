@@ -65,8 +65,7 @@
         [(eq? (send ev get-event-type) 'left-down)
          (define-values (vx vy) (get-view-start))
          (define item (locate-item (+ vx (send ev get-x))
-                                   (+ vy (send ev get-y))
-                                   #t))
+                                   (+ vy (send ev get-y))))
          (when item
            (expand-item item (not (node-cursor-expand? item))))]
         [else (super on-event ev)]))

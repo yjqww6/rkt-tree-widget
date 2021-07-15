@@ -20,8 +20,8 @@
     (define/public (get-total-size cw ch)
       (tree-pos-cache-total-size cache))
 
-    (define/public (locate-item x y [check-x? #f])
-      (tree-pos-cache-locate-item cache x y check-x?))
+    (define/public (locate-item x y)
+      (tree-pos-cache-locate-item cache (or x 0) y (and x #t)))
 
     (define/public (get-visible-items start end)
       (tree-pos-cache-get-visible-items cache start end))

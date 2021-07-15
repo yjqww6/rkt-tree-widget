@@ -42,7 +42,7 @@
 
     [paint-item (->m node-cursor? any/c exact-nonnegative-integer? exact-nonnegative-integer? void?)]
     [compute-item-size (->m any/c (values exact-positive-integer? exact-positive-integer? exact-nonnegative-integer?))]
-    [locate-item (->*m (exact-nonnegative-integer? exact-nonnegative-integer?) (boolean?) (or/c #f node-cursor?))]
+    [locate-item (->m (or/c #f exact-nonnegative-integer?) exact-nonnegative-integer? (or/c #f node-cursor?))]
 
     [make-indices-cursor (->m (non-empty-listof exact-nonnegative-integer?) indices-cursor?)])]
 
