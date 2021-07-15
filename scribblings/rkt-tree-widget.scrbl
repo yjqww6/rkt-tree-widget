@@ -172,7 +172,7 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
 @defproc[(node-cursor-expand? [c node-cursor?]) boolean?]{
  Returns @racket[#t] if @racket[c] is expanded, otherwise @racket[#f].
 }
-@defproc[(node-cursor-pos [c cursor?]) exact-nonnegative-integer?]{
+@defproc[(node-cursor-pos [c node-cursor?]) exact-nonnegative-integer?]{
  Returns the the position of @racket[c] in its parent.
 }
 
