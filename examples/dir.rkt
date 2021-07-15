@@ -44,7 +44,7 @@
       (when (entry-dir? v)
         (draw-triangle dc x y h (node-cursor-expand? c)))
       
-      (send dc draw-text (~a (entry-name v))
+      (send dc draw-text (entry-name v)
             (+ x h)
             y))
       
@@ -89,10 +89,44 @@
 
     (super-new)))
 
+(define (lines-mixin %)
+  (class %
+    (inherit get-dc)
+    (super-new)
+    
+    (define/override (paint-item c v x y)
+      (define dc (get-dc))
+      
+      (define-values (w h) (node-cursor-item-size c))
+
+      (let loop ([c (cursor-up c)] [child c] [x (- x (/ h 2))] [first #t])
+        (when (node-cursor? c)
+          (cond
+            [(= (+ 1 (node-cursor-pos child)) (cursor-children-count c))
+             (when first
+               (send dc draw-line
+                     x y
+                     x (+ y (/ h 2))))]
+            [else
+             (send dc draw-line
+                   x y
+                   x (+ y h))])
+          (loop (cursor-up c) c (- x h) #f)))
+
+      (when (node-cursor? (cursor-up c))
+        (send dc draw-line
+              (- x (/ h 2)) (+ y (/ h 2))
+              (cond
+                [(entry-dir? v) x]
+                [else (+ x (/ h 2))])
+              (+ y (/ h 2))))
+      
+      (super paint-item c v x y))))
+
 (module+ main
   (define f (new frame% [label "test"] [width 320] [height 640]))
   
-  (define t (new (paint-mixin tree-widget%)
+  (define t (new (lines-mixin (paint-mixin tree-widget%))
                  [parent f] [style '(vscroll)]))
 
   (define b (new button%
