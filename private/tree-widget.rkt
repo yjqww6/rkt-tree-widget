@@ -158,9 +158,9 @@
           [(vector c y v)
            (paint-item c v (+ (cursor-indent c) cx) (+ y cy))])))
 
-    (define/override (locate-item x y [check-x? #f])
+    (define/override (locate-item x y)
       (define-values (cx cy) (get-scrollable-canvas-start))
-      (super locate-item (- x cx) (- y cy) check-x?))
+      (super locate-item (and x (- x cx)) (- y cy)))
     
     (super-new)))
 
