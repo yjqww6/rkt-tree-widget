@@ -1,5 +1,5 @@
 #lang scribble/manual
-@require[@for-label[rkt-tree-widget
+@require[@for-label[rkt-tree-widget 
                     racket/base racket/class racket/gui/base racket/contract/base]]
 
 @title{rkt-tree-widget}
@@ -217,6 +217,11 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
 @defproc[(root-cursor-get-visible-items [c root-cursor?] [y-start exact-nonnegative-integer?] [y-end exact-nonnegative-integer?])
          (listof (vector/c node-cursor? exact-nonnegative-integer? any/c))]{
  Returns a list of visible items (flattened) in [@racket[y-start], @racket[y-end]) (relative to @racket[c]).
- Vectors in that list contains the cursor, the y location, and the value of correspoding node.
+ Vectors in that list consist of the cursor, the y location, and the value of correspoding node.
 }
+
+@section{@racketmodname[rkt-tree-widget/base]}
+@defmodule[rkt-tree-widget/base]
+@racketmodname[rkt-tree-widget/base] provides all the exports provided from @racketmodname[rkt-tree-widget], except @racket[tree-widget%].
+It doesn't depend on @racketmodname[racket/gui].
 
