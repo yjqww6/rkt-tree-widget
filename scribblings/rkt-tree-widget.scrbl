@@ -92,7 +92,7 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
 @defclass[tree-updater% object% ()]{
  @racket[tree-updater%] is used to building and updating @racket[tree-widget%] functionally.
  @defconstructor[([tree (is-a?/c tree-widget%)])]{
- Constructs a @racket[tree-updater%] associated with @racket[tree].
+  Constructs a @racket[tree-updater%] associated with @racket[tree].
  }
 
  @defmethod[(append-item [t generic-cursor?] [v any/c]
@@ -116,10 +116,10 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
  @defmethod[(expand-item [t generic-cursor?] [expand? boolean?]) root-cursor?]{
  }
  @defmethod[(update-children [t generic-cursor?] [f (-> root-cursor? root-cursor?)])
-             root-cursor?]{
+            root-cursor?]{
  }
  @defmethod[(set-tree [tree root-cursor?]) void?]{
- Set the tree of associated @racket[tree-widget%] to @racket[tree].
+  Set the tree of associated @racket[tree-widget%] to @racket[tree].
  }
  @defmethod[(empty-tree) root-cursor?]{
  }
@@ -175,6 +175,20 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
 @defproc[(node-cursor-pos [c node-cursor?]) exact-nonnegative-integer?]{
  Returns the the position of @racket[c] in its parent.
 }
-
-
+@defproc[(node-cursor-children-indent [c node-cursor?]) exact-nonnegative-integer?]{
+ Returns the chilren indentation of @racket[c].
+}
+@defproc[(root-cursor-total-size [c root-cursor?])
+         (values exact-nonnegative-integer? exact-nonnegative-integer?)]{
+ Returns the total size required by @racket[c].
+}
+@defproc[(root-cursor-locate-item [c root-cursor?] [x (or/c #f exact-nonnegative-integer?)] [y exact-nonnegative-integer?])
+         (or/c #f node-cursor?)]{
+ Similar to @method[tree-widget% locate-item], but @racket[x] and @racket[y] are relative to @racket[c].
+}
+@defproc[(root-cursor-get-visible-items [c root-cursor?] [y-start exact-nonnegative-integer?] [y-end exact-nonnegative-integer?])
+         (listof (vector/c node-cursor? exact-nonnegative-integer? any/c))]{
+ Returns a list of visible items (flattened) in [@racket[y-start], @racket[y-end]) (relative to @racket[c]).
+ Vectors in that list contains the cursor, the y location, and the value of correspoding node.
+}
 

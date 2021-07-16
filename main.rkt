@@ -24,9 +24,17 @@
   [cursor-children-count (-> cursor? exact-nonnegative-integer?)]
   [cursor-get-child (-> cursor? exact-nonnegative-integer? node-cursor?)]
   [node-cursor-item-size (-> node-cursor? (values exact-positive-integer? exact-positive-integer?))]
+  
   [node-cursor-value (-> node-cursor? any/c)]
   [node-cursor-expand? (-> node-cursor? boolean?)]
   [node-cursor-pos (-> node-cursor? exact-nonnegative-integer?)]
+  [node-cursor-children-indent (-> node-cursor? exact-nonnegative-integer?)]
+
+  [root-cursor-total-size (-> root-cursor? (values exact-nonnegative-integer? exact-nonnegative-integer?))]
+  [root-cursor-locate-item (-> root-cursor? (or/c #f exact-nonnegative-integer?) exact-nonnegative-integer?
+                               (or/c #f node-cursor?))]
+  [root-cursor-get-visible-items (-> root-cursor? exact-nonnegative-integer? exact-nonnegative-integer?
+                                     (listof (vector/c node-cursor? exact-nonnegative-integer? any/c)))]
   
   [tree-widget%
    (class/c

@@ -15,15 +15,6 @@
     (define/public (compute-indent v w h)
       w)
 
-    (define/public (get-total-size cw ch)
-      (tree-pos-cache-total-size cache))
-
-    (define/public (locate-item x y)
-      (tree-pos-cache-locate-item cache (or x 0) y (and x #t)))
-
-    (define/public (get-visible-items start end)
-      (tree-pos-cache-get-visible-items cache start end))
-
     (define/public (get-root)
       cache)
 
@@ -51,22 +42,22 @@
         (define-values (w h ind) (compute-item-size v))
         (set-root (op t a ... (λ () (values v w h ind)) expand? #f))))
 
-    (define-op (append-item t v) tree-pos-cache-append)
-    (define-op (prepend-item t v) tree-pos-cache-prepend)
-    (define-op (insert-item t i v) tree-pos-cache-insert)
+    (define-op (append-item t v) cursor-append-item)
+    (define-op (prepend-item t v) cursor-prepend-item)
+    (define-op (insert-item t i v) cursor-insert-item)
 
     (define/public (update-item t i v)
       (validate-cursor 'update-item t)
       (define-values (w h ind) (compute-item-size v))
-      (set-root (tree-pos-cache-update t i (λ () (values v w h ind)))))
+      (set-root (cursor-update-item t i (λ () (values v w h ind)))))
 
     (define/public (delete-item t i)
       (validate-cursor 'delete-item t)
-      (set-root (tree-pos-cache-delete t i)))
+      (set-root (cursor-delete-item t i)))
 
     (define/public (expand-item t b?)
       (validate-cursor 'expand-item t)
-      (set-root (tree-pos-cache-expand t b?)))
+      (set-root (cursor-expand-item t b?)))
 
     (define/public (reset-items)
       (set-root empty-tree-pos-cache))
@@ -86,22 +77,22 @@
         (define-values (w h ind) (send tree compute-item-size v))
         (op t a ... (λ () (values v w h ind)) expand? (and children (cursor-node children)))))
 
-    (define-op (append-item t v) tree-pos-cache-append)
-    (define-op (prepend-item t v) tree-pos-cache-prepend)
-    (define-op (insert-item t i v) tree-pos-cache-insert)
+    (define-op (append-item t v) cursor-append-item)
+    (define-op (prepend-item t v) cursor-prepend-item)
+    (define-op (insert-item t i v) cursor-insert-item)
 
     (define/public (update-item t i v)
       (define-values (w h ind) (send tree compute-item-size v))
-      (tree-pos-cache-update t i (λ () (values v w h ind))))
+      (cursor-update-item t i (λ () (values v w h ind))))
 
     (define/public (delete-item t i)
-      (tree-pos-cache-delete t i))
+      (cursor-delete-item t i))
 
     (define/public (expand-item t b?)
-      (tree-pos-cache-expand t b?))
+      (cursor-expand-item t b?))
 
     (define/public (update-children t u)
-      (tree-pos-cache-update-children t u))
+      (cursor-update-children t u))
 
     (define/public (set-tree t)
       (send tree set-root t))
@@ -110,11 +101,11 @@
       empty-tree-pos-cache)))
 
 (define scrollable-mixin
-  (mixin ((class->interface canvas%)) (scrollable<%>)
-    (inherit get-view-start get-virtual-size)
+  (mixin ((class->interface canvas%) tree<%>) (scrollable<%>)
+    (inherit get-view-start get-root)
     
     (define/public (get-scrollable-size)
-      (get-virtual-size))
+      (root-cursor-total-size (get-root)))
     
     (define/public (get-scrollable-pos)
       (get-view-start))
@@ -126,10 +117,9 @@
 
 (define tree-canvas-mixin
   (mixin ((class->interface canvas%) tree<%> scrollable<%>) ()
-    (inherit refresh
+    (inherit refresh get-root
              get-scrollable-pos get-client-size
-             get-scrollable-canvas-start
-             get-visible-items)
+             get-scrollable-canvas-start)
 
     (define/override (on-positions-changed)
       (refresh))
@@ -144,15 +134,15 @@
       (define-values (cw ch) (get-client-size))
       (define-values (cx cy) (get-scrollable-canvas-start))
 
-      (define items (get-visible-items y (+ y ch)))
+      (define items (root-cursor-get-visible-items (get-root) y (+ y ch)))
       (for ([item (in-list items)])
         (match item
           [(vector c y v)
            (paint-item c v (+ (cursor-indent c) cx) (+ y cy))])))
 
-    (define/override (locate-item x y)
+    (define/public (locate-item x y)
       (define-values (cx cy) (get-scrollable-canvas-start))
-      (super locate-item (and x (- x cx)) (- y cy)))
+      (root-cursor-locate-item (get-root) (and x (- x cx)) (- y cy)))
     
     (super-new)))
 

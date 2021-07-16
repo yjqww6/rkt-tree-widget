@@ -162,30 +162,30 @@
      (tree-pos-cache
       (f root indices))]))
 
-(define (tree-pos-cache-append t v e? c)
+(define (cursor-append-item t v e? c)
   (define (u t) (append-item t (make-node-field-generator v e? c)))
   (update-node-children t u))
 
-(define (tree-pos-cache-prepend t v e? c)
+(define (cursor-prepend-item t v e? c)
   (define (u t) (prepend-item t (make-node-field-generator v e? c)))
   (update-node-children t u))
 
-(define (tree-pos-cache-insert t i v e? c)
+(define (cursor-insert-item t i v e? c)
   (define (u t) (insert-item t i (make-node-field-generator v e? c)))
   (update-node-children t u))
 
-(define (tree-pos-cache-delete t i)
+(define (cursor-delete-item t i)
   (define (u t) (delete-item t i))
   (update-node-children t u))
 
-(define (tree-pos-cache-update t i v)
+(define (cursor-update-item t i v)
   (define (updater t)
     (define-values (value width height ind) (v))
     (values value width height (T-children t) (T-expand? t) ind))
   (define (u t) (update-item t i updater))
   (update-node-children t u))
 
-(define (tree-pos-cache-expand t b)
+(define (cursor-expand-item t b)
   (define (updater t)
     (match t
       [(T _ _ _ v w h c _ ind _ _)
@@ -197,7 +197,7 @@
      (define (u t) (update-item t pos updater))
      (update-node-children c u)]))
 
-(define (tree-pos-cache-update-children t u)
+(define (cursor-update-children t u)
   (define (updater t)
     (match t
       [(T _ _ _ v w h c b ind _ _)
@@ -209,36 +209,39 @@
      (define (f t) (update-item t pos updater))
      (update-node-children c f)]))
 
-(define (tree-pos-cache-total-size t)
-  (match t
-    [(tree-pos-cache #f)
-     (values 0 0)]
-    [(tree-pos-cache root)
-     (values (T-max-width root)
-             (T-total-height root))]))
+(define (node-total-size node)
+  (if node
+      (values (T-max-width node)
+              (T-total-height node))
+      (values 0 0)))
 
-(define (tree-pos-cache-locate-item t x y [check-x? #f])
+(define (root-cursor-total-size t)
+  (node-total-size (tree-pos-cache-root t)))
+
+(define (root-cursor-locate-item t x y)
   (define root (tree-pos-cache-root t))
-  (let f ([t root] [y y] [offset 0] [x x] [frames #f])
-    (match t
-      [(T l r _ _ w h c e? ind mw th)
-       #:when (or (not check-x?)
-                  (and (< x mw) (< y th)))
-       (define thl (tree-total-height l))
-       (define thr (tree-total-height r))
-       (define thc (- th h thl thr))
-       (cond
-         [(< y thl) (f l y offset x frames)]
-         [(< y (+ thl h))
-          (if (or (not check-x?) (and (>= x 0) (< x w)))
-              (node-cursor root t (+ offset (tree-size l)) frames)
-              #f)]
-         [(< y (+ thl h thc))
-          (f c (- y thl h) 0 (- x ind) (frame t (+ offset (tree-size l)) frames))]
-         [else (f r (- y (- th thr)) (+ offset (tree-size l) 1) x frames)])]
-      [else #f])))
+  (let ([x (or x 0)]
+        [check-x? (and x #t)])
+    (let f ([t root] [y y] [offset 0] [x x] [frames #f])
+      (match t
+        [(T l r _ _ w h c e? ind mw th)
+         #:when (or (not check-x?)
+                    (and (< x mw) (< y th)))
+         (define thl (tree-total-height l))
+         (define thr (tree-total-height r))
+         (define thc (- th h thl thr))
+         (cond
+           [(< y thl) (f l y offset x frames)]
+           [(< y (+ thl h))
+            (if (or (not check-x?) (and (>= x 0) (< x w)))
+                (node-cursor root t (+ offset (tree-size l)) frames)
+                #f)]
+           [(< y (+ thl h thc))
+            (f c (- y thl h) 0 (- x ind) (frame t (+ offset (tree-size l)) frames))]
+           [else (f r (- y (- th thr)) (+ offset (tree-size l) 1) x frames)])]
+        [else #f]))))
 
-(define (tree-pos-cache-get-visible-items t start end)
+(define (root-cursor-get-visible-items t start end)
   (define root (tree-pos-cache-root t))
   (let f ([t root] [start start] [end end] [offset 0] [y-offset 0] [frames #f] [ls '()])
     (match t
@@ -300,6 +303,9 @@
 
 (define (node-cursor-expand? t)
   (T-expand? (node-cursor-node t)))
+
+(define (node-cursor-children-indent t)
+  (T-indent (node-cursor-node t)))
 
 (define (tree-pos-cache-make-indices-cursor t l)
   (indices-cursor (tree-pos-cache-root t) l))

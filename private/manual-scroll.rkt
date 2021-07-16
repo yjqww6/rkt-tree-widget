@@ -8,7 +8,7 @@
     (inherit refresh get-dc
              init-manual-scrollbars get-client-size
              get-scroll-range get-scroll-pos set-scroll-pos
-             get-total-size)
+             get-scrollable-size)
     (init [(-ws wheel-step) 3]
           [[-style style] '()])
    
@@ -18,10 +18,6 @@
     (define scroll?
       (or (memq 'hscroll -style)
           (memq 'vscroll -style)))
-
-    (define/override (get-scrollable-size)
-      (values (get-scroll-range 'horizontal)
-              (get-scroll-range 'vertical)))
 
     (define/override (get-scrollable-pos)
       (values (get-scroll-pos 'horizontal)
@@ -39,7 +35,7 @@
       (define-values (cw ch) (get-client-size))
 
       (define-values (x y) (get-scrollable-pos))
-      (define-values (w h) (get-total-size cw ch))
+      (define-values (w h) (get-scrollable-size))
 
       (define vw (max 1 (- w cw)))
       (define vh (max 1 (- h ch)))
