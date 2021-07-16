@@ -105,7 +105,7 @@
   
   (time
    (send u set-tree
-         (let f ([i 4])
+         (let f ([i 5])
            (cond
              [(= i 0) (send u empty-tree)]
              [else

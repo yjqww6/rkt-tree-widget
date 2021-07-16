@@ -204,7 +204,7 @@
 
   ;;; deletion
 
-  (struct Del (tree balanced) #:authentic #:sealed)
+  (struct Del (tree balanced) #:authentic)
 
   (define (make-black t)
     (match t
@@ -223,7 +223,7 @@
       [(Red lx rx _) (Del (black (balance-right l (as-red lx) t) rx r) #f)]
       [else (Del (black l r t) #f)]))
 
-  (struct Delmin (del min) #:authentic #:sealed)
+  (struct Delmin (del min) #:authentic)
 
   (define (delete-min t)
     (match (del-min t)

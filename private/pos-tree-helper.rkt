@@ -24,8 +24,8 @@
      #'(begin
          (struct N Node (Field ... Augment ...)
            #:authentic #:transparent)
-         (struct Red N () #:authentic #:sealed #:transparent)
-         (struct Black N () #:authentic #:sealed #:transparent)
+         (struct Red N () #:authentic #:transparent)
+         (struct Black N () #:authentic #:transparent)
 
          (define red? Red?)
          (define black? Black?)

@@ -35,18 +35,18 @@
 (require 'tree)
 
 (struct tree-pos-cache (root)
-  #:authentic #:sealed)
+  #:authentic )
 
 (define empty-tree-pos-cache (tree-pos-cache #f))
 
 (struct frame (node pos frames)
-  #:authentic #:sealed)
+  #:authentic )
 
 (struct node-cursor (root node pos frames)
-  #:authentic #:sealed)
+  #:authentic )
 
 (struct indices-cursor (root indices)
-  #:authentic #:sealed)
+  #:authentic )
 
 (define (cursor-up t)
   (match t
