@@ -1,5 +1,5 @@
 #lang racket/base
-(require "private/tree-widget.rkt"
+(require "private/tree-widget.rkt" "private/interfaces.rkt"
          (rename-in "private/tree-pos-cache.rkt"
                     [tree-pos-cache? root-cursor?])
          racket/class racket/contract/base)
@@ -15,6 +15,9 @@
  node-cursor?
  indices-cursor?
  (all-defined-out)
+
+ tree<%> 
+ 
  (contract-out
   [cursor-up (-> cursor? cursor?)]
   [cursor-equal? (-> cursor? cursor? boolean?)]
@@ -35,12 +38,14 @@
                                (or/c #f node-cursor?))]
   [root-cursor-get-visible-items (-> root-cursor? exact-nonnegative-integer? exact-nonnegative-integer?
                                      (listof (vector/c node-cursor? exact-nonnegative-integer? any/c)))]
+  [tree-mixin mixin-contract]
   
   [tree-widget%
    (class/c
     (init [wheel-step exact-positive-integer?])
     
     [get-root (->m root-cursor?)]
+    [set-root (->m root-cursor? void?)]
 
     [append-item (->*m (generic-cursor? any/c) (boolean?) void?)]
     [prepend-item (->*m (generic-cursor? any/c) (boolean?) void?)]
@@ -59,7 +64,7 @@
 
   [tree-updater%
    (class/c
-    (init [tree (is-a?/c tree-widget%)])
+    (init-field [tree (instanceof/c (implementation?/c tree<%>))])
 
     [append-item (->*m (generic-cursor? any/c) (boolean? (or/c #f cursor?)) root-cursor?)]
     [prepend-item (->*m (generic-cursor? any/c) (boolean? (or/c #f cursor?)) root-cursor?)]

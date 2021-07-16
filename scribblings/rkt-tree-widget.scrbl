@@ -10,7 +10,7 @@
 Yet another tree widget for Racket. It uses functional cursors to represent the nodes of the tree.
 
 @section{Tree Widget}
-@defclass[tree-widget% canvas% ()]{
+@defclass[tree-widget% canvas% (tree<%>)]{
  A @racket[canvas%]-based tree widget.
    
  @defconstructor/auto-super[([wheel-step exact-positive-integer? 3])]{
@@ -20,6 +20,11 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
  @defmethod[(get-root) root-cursor?]{
   Returns a cursor representing the root of the tree.
  }
+
+ @defmethod[(set-root [c root-cursor?]) void?]{
+  Set the root of the tree.
+ }
+
 
  @defmethod[(append-item [c generic-cursor?] [v any/c] [expand? boolean? #f]) void?]{
   Appends an item @racket[v] to the children of @racket[c]. All the cursors acquired previously will be invalidated.
@@ -62,7 +67,7 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
   Paints the item @racket[v] represented by cursor @racket[c] at specific dc location.
  }
 
- @defmethod[(compute-item-size [v any/c])
+ @defmethod[#:mode override (compute-item-size [v any/c])
             (values exact-positive-integer? exact-positive-integer? exact-nonnegative-integer?)]{
   Computes the width, height and children indentation of item @racket[v].
 
@@ -88,10 +93,33 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
  
 }
 
+@section{Tree mixin}
+@definterface[tree<%> ()]{
+ @defmethod[(get-root) root-cursor?]{
+  Returns a cursor representing the root of the tree.
+ }
+
+ @defmethod[(set-root [c root-cursor?]) void?]{
+  Set the root of the tree.
+ }
+
+ @defmethod[(compute-item-size [v any/c])
+            (values exact-positive-integer? exact-positive-integer? exact-nonnegative-integer?)]{
+  Computes the width, height and children indentation of item @racket[v].                                                   
+ }
+
+ @defmethod[(on-positions-changed) void?]{
+  Called after the tree is modified.
+ }                                                          
+}
+
+@defmixin[tree-mixin () (tree<%>)]{
+}
+
 @section{Functional Updating}
 @defclass[tree-updater% object% ()]{
  @racket[tree-updater%] is used to building and updating @racket[tree-widget%] functionally.
- @defconstructor[([tree (is-a?/c tree-widget%)])]{
+ @defconstructor[([tree (instanceof/c (implementation?/c tree<%>))])]{
   Constructs a @racket[tree-updater%] associated with @racket[tree].
  }
 
@@ -119,7 +147,7 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
             root-cursor?]{
  }
  @defmethod[(set-tree [tree root-cursor?]) void?]{
-  Set the tree of associated @racket[tree-widget%] to @racket[tree].
+  Set the root of associated @racket[tree<%>] to @racket[tree].
  }
  @defmethod[(empty-tree) root-cursor?]{
  }
@@ -173,7 +201,7 @@ Yet another tree widget for Racket. It uses functional cursors to represent the 
  Returns @racket[#t] if @racket[c] is expanded, otherwise @racket[#f].
 }
 @defproc[(node-cursor-pos [c node-cursor?]) exact-nonnegative-integer?]{
- Returns the the position of @racket[c] in its parent.
+ Returns the position of @racket[c] in its parent.
 }
 @defproc[(node-cursor-children-indent [c node-cursor?]) exact-nonnegative-integer?]{
  Returns the chilren indentation of @racket[c].
