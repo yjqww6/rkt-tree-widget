@@ -5,13 +5,8 @@
 
 (define (paint-mixin %)
   (class %
-    (inherit get-dc get-client-size
-             get-view-start refresh
-             locate-item
-             reset-items append-item expand-item
-             get-root make-indices-cursor)
-
-    (define updating? #f)
+    (inherit get-dc get-view-start
+             locate-item expand-item)
 
     (define/private (draw-triangle dc x y h e?)
       (define h1 (/ h 3))
