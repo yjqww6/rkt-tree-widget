@@ -2,7 +2,7 @@
 (define collection "rkt-tree-widget")
 (define deps '("base" "gui-lib"))
 (define build-deps '("scribble-lib" "racket-doc" "gui-doc" "rackunit-lib"))
-(define scribblings '(("scribblings/rkt-tree-widget.scrbl" ())))
+(define scribblings '(("scribblings/rkt-tree-widget.scrbl" () (gui-library))))
 (define pkg-desc "Yet another tree widget for racket/gui")
 (define version "0.1")
 (define pkg-authors '(yjqww6))
