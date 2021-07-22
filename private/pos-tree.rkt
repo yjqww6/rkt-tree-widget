@@ -88,6 +88,10 @@
              append-item prepend-item
              update-item))
 
+(struct Delmin (del min) #:authentic)
+
+(struct Del (tree balanced) #:authentic)
+
 (define-unit pos-tree-op@
   (import pos-tree^)
   (export pos-tree-op^)
@@ -204,8 +208,6 @@
 
   ;;; deletion
 
-  (struct Del (tree balanced) #:authentic)
-
   (define (make-black t)
     (match t
       [(Red l r _) (Del (black l r t) #f)]
@@ -222,8 +224,6 @@
       [(Black _ _ _) (Del (balance-right l (as-red r) t) (not c))]
       [(Red lx rx _) (Del (black (balance-right l (as-red lx) t) rx r) #f)]
       [else (Del (black l r t) #f)]))
-
-  (struct Delmin (del min) #:authentic)
 
   (define (delete-min t)
     (match (del-min t)
