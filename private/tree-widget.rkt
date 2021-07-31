@@ -47,10 +47,13 @@
 
 (define scrollable-mixin
   (mixin ((class->interface canvas%) tree<%>) (scrollable<%>)
-    (inherit get-view-start get-root)
+    (inherit get-view-start get-root get-client-size)
     
     (define/public (get-scrollable-size)
       (root-cursor-total-size (get-root)))
+
+    (define/public (get-scrollable-client-size)
+      (get-client-size))
     
     (define/public (get-scrollable-pos)
       (get-view-start))
@@ -63,7 +66,7 @@
 (define tree-canvas-mixin
   (mixin ((class->interface canvas%) tree<%> scrollable<%>) ()
     (inherit refresh get-root
-             get-scrollable-pos get-client-size
+             get-scrollable-pos get-scrollable-client-size
              get-scrollable-canvas-start)
 
     (define/override (on-positions-changed)
@@ -76,7 +79,7 @@
       (super on-paint)
       
       (define-values (x y) (get-scrollable-pos))
-      (define-values (cw ch) (get-client-size))
+      (define-values (cw ch) (get-scrollable-client-size))
       (define-values (cx cy) (get-scrollable-canvas-start))
 
       (define items (root-cursor-get-visible-items (get-root) y (+ y ch)))
