@@ -12,5 +12,6 @@
 (define scrollable<%>
   (interface ()
     get-scrollable-size
+    get-scrollable-client-size
     get-scrollable-pos
     get-scrollable-canvas-start))
