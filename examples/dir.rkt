@@ -88,6 +88,8 @@
   (class %
     (inherit get-dc)
     (super-new)
+
+    (send (get-dc) set-smoothing 'aligned)
     
     (define/override (paint-item c v x y)
       (define dc (get-dc))
